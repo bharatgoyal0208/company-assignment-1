@@ -1,12 +1,12 @@
 const fs = require("fs");
 
-const ancillaryService = async (data) => {
+const ancillaryService = async (data, id) => {
     try {
         // process data
 
         // data out
         fs.appendFile(
-            "data.txt",
+            `data_request_${id}.txt`,
             `${new Date() + ": " + data},\r\n`,
             function (err) {
                 if (err) throw err;

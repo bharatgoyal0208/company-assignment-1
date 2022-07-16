@@ -20,7 +20,7 @@ const ping = async (req, res) => {
         if (obj.isLast) {
             let data = map.get(obj.id);
             map.delete(obj.id);
-            ancillaryService(data);
+            ancillaryService(data, obj.id);
         }
         res.json({ message: "Input received", "status code": 201 });
     } catch (err) {
