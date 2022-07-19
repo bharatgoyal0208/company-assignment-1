@@ -1,18 +1,14 @@
 const fs = require("fs");
 
-const ancillaryService = async (data, id) => {
+const ancillaryService = (data, id) => {
     try {
         // process data
+        let d = [];
+        data.message.forEach(element => {
+            d.push(element.payload.length);
+        });
+        return d;
 
-        // data out
-        fs.appendFile(
-            `data_request_${id}.txt`,
-            `${new Date() + ": " + data},\r\n`,
-            function (err) {
-                if (err) throw err;
-                console.log("File is updated successfully.");
-            }
-        );
     } catch (err) {
         console.log(err);
     }

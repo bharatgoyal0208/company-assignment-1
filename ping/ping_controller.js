@@ -1,4 +1,5 @@
 const { ancillaryService } = require("./AncillaryService");
+const { webHookService } = require("./WebHookService");
 
 const map = new Map();
 
@@ -7,26 +8,43 @@ const ping = async (req, res) => {
         let obj = req.body;
 
         if (map.has(obj.id)) {
-            let list = map.get(obj.id);
-            // store data as per the order (at index: order)
-            list.splice(obj.order, 0, obj.payload);
-            map.set(obj.id, list);
+            let oldData = map.get(obj.id);
+            oldData.message.push(obj);
+            if (obj.isLast) {
+                oldData.isLast = obj.isLast;
+                oldData.index = obj.order;
+            }
+            map.set(obj.id, oldData);
         } else {
-            let list = [obj.payload];
-            map.set(obj.id, list);
+            let constructedData = {
+                message: [obj],
+                isLast: obj.isLast,
+                index: obj.order,
+            };
+            map.set(obj.id, constructedData);
         }
 
-        // check for the last packet
-        if (obj.isLast) {
-            let data = map.get(obj.id);
+        let data = map.get(obj.id);
+        if (data.isLast && data.message.length == data.index) {
             map.delete(obj.id);
-            ancillaryService(data, obj.id);
+
+            data.message = getData(data.message);
+
+            let processedData = ancillaryService(data, obj.id);
+            webHookService(processedData, obj.id);
         }
         res.json({ message: "Input received", "status code": 201 });
     } catch (err) {
         console.log(err);
         res.json({ message: err });
     }
+};
+
+const getData = (data) => {
+    data.sort(function (a, b) {
+        return a.order - b.order;
+    });
+    return data;
 };
 
 module.exports = {
